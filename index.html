@@ -1,56 +1,1049 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>EduPath AI</title>
-    <link rel="stylesheet" href="style.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #222;
+        }
+
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: #2563eb;
+        }
+
+        h3 {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 16px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .skill {
+            display: inline-block;
+            background: #e0ecff;
+            color: #1d4ed8;
+            padding: 8px 12px;
+            border-radius: 20px;
+            margin: 5px;
+        }
+
+        .gap {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 7px;
+        }
+
+        .objective {
+            background: #ecfdf5;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 7px;
+        }
+
+        .resource {
+            background: #f8fafc;
+            border-left: 5px solid #2563eb;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .week {
+            background: #f8fafc;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+
+        .week input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .progress-container {
+            background: #ddd;
+            border-radius: 20px;
+            height: 20px;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            background: #2563eb;
+            height: 100%;
+            width: 0%;
+            border-radius: 20px;
+            transition: 0.5s;
+        }
+
+        .chat-box {
+            height: 250px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 7px 0;
+            border-radius: 8px;
+        }
+
+        .user {
+            background: #dbeafe;
+            text-align: right;
+        }
+
+        .bot {
+            background: #f1f5f9;
+        }
+
+        .report {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 
 <body>
 
+<header>
     <h1>EduPath AI 🤖</h1>
-
-    <h2>Your Personal Learning Coach</h2>
-
-    <p>What do you want to become?</p>
-
-    <input 
-        type="text" 
-        id="careerInput" 
-        placeholder="Example: Quant Analyst"
-    >
-
-    <br><br>
-
-    <button onclick="goNext()">Next</button>
-
-    <div id="nextStep"></div>
+    <p>Your Personal Learning & Skill Gap Agent</p>
+</header>
 
 
-    <script>
-        function goNext() {
+<div class="container">
 
-            // Get the value entered by the user
-            let career = document.getElementById("careerInput").value;
+    <!-- PROFILE -->
 
-            // Check if input is empty
-            if (career.trim() === "") {
-                alert("Please enter what you want to become.");
-                return;
+    <div class="card" id="profileSection">
+
+        <h2>🎯 Create Your Learning Profile</h2>
+
+        <label>What do you want to become?</label>
+
+        <input
+            type="text"
+            id="career"
+            placeholder="Example: Quant Analyst"
+        >
+
+        <label>Current Skills</label>
+
+        <input
+            type="text"
+            id="skills"
+            placeholder="Example: Python, Mathematics, Excel"
+        >
+
+        <label>Experience Level</label>
+
+        <select id="experience">
+
+            <option value="Beginner">Beginner</option>
+
+            <option value="Intermediate">
+                Intermediate
+            </option>
+
+            <option value="Advanced">
+                Advanced
+            </option>
+
+        </select>
+
+
+        <label>Career Goal</label>
+
+        <textarea
+            id="goal"
+            placeholder="Describe your career goal..."
+        ></textarea>
+
+
+        <label>Upload Resume / Project Description</label>
+
+        <input
+            type="file"
+            id="resume"
+            accept=".txt,.pdf,.doc,.docx"
+        >
+
+
+        <button onclick="generatePath()">
+            Generate My Learning Path 🚀
+        </button>
+
+    </div>
+
+
+    <!-- DASHBOARD -->
+
+    <div id="dashboard" class="hidden">
+
+        <!-- PROFILE SUMMARY -->
+
+        <div class="card">
+
+            <h2>👤 Your Profile</h2>
+
+            <p>
+                <strong>Target Role:</strong>
+                <span id="showCareer"></span>
+            </p>
+
+            <p>
+                <strong>Experience:</strong>
+                <span id="showExperience"></span>
+            </p>
+
+            <p>
+                <strong>Goal:</strong>
+                <span id="showGoal"></span>
+            </p>
+
+        </div>
+
+
+        <!-- CURRENT SKILLS -->
+
+        <div class="card">
+
+            <h2>💡 Your Current Skills</h2>
+
+            <div id="skillList"></div>
+
+        </div>
+
+
+        <!-- SKILL GAP -->
+
+        <div class="card">
+
+            <h2>🔍 Skill Gap Analysis</h2>
+
+            <p>
+                Based on your target role, EduPath AI identified
+                the following areas to develop:
+            </p>
+
+            <div id="gapList"></div>
+
+        </div>
+
+
+        <!-- LEARNING OBJECTIVES -->
+
+        <div class="card">
+
+            <h2>📚 Learning Objectives</h2>
+
+            <div id="objectiveList"></div>
+
+        </div>
+
+
+        <!-- RESOURCES -->
+
+        <div class="card">
+
+            <h2>🌐 Recommended Learning Resources</h2>
+
+            <div id="resourceList"></div>
+
+        </div>
+
+
+        <!-- WEEKLY PLAN -->
+
+        <div class="card">
+
+            <h2>📅 Personalized Weekly Plan</h2>
+
+            <p>
+                Complete the activities below to update your progress.
+            </p>
+
+            <div id="weeklyPlan"></div>
+
+        </div>
+
+
+        <!-- PRACTICE -->
+
+        <div class="card">
+
+            <h2>🧪 Practice Tasks</h2>
+
+            <div id="practiceList"></div>
+
+        </div>
+
+
+        <!-- PROJECT -->
+
+        <div class="card">
+
+            <h2>🚀 Project Ideas</h2>
+
+            <div id="projectList"></div>
+
+        </div>
+
+
+        <!-- PROGRESS -->
+
+        <div class="card">
+
+            <h2>📊 Learning Progress</h2>
+
+            <p id="progressText">
+                0% completed
+            </p>
+
+            <div class="progress-container">
+
+                <div
+                    class="progress-bar"
+                    id="progressBar">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- REPORT -->
+
+        <div class="card">
+
+            <h2>📈 Progress Report</h2>
+
+            <div class="report">
+
+                <p>
+                    <strong>Skills Acquired:</strong>
+                </p>
+
+                <p id="acquired">
+                    Complete activities to acquire skills.
+                </p>
+
+                <br>
+
+                <p>
+                    <strong>Skills In Progress:</strong>
+                </p>
+
+                <p id="inProgress"></p>
+
+                <br>
+
+                <p>
+                    <strong>Remaining Gaps:</strong>
+                </p>
+
+                <p id="remainingGaps"></p>
+
+                <br>
+
+                <p>
+                    <strong>Recommended Next Step:</strong>
+                </p>
+
+                <p id="nextStep"></p>
+
+            </div>
+
+        </div>
+
+
+        <!-- AI CHAT -->
+
+        <div class="card">
+
+            <h2>🤖 Ask EduPath AI</h2>
+
+            <div
+                class="chat-box"
+                id="chatBox">
+
+                <div class="message bot">
+                    Hello! 👋 Ask me anything about your
+                    learning journey.
+                </div>
+
+            </div>
+
+
+            <input
+                type="text"
+                id="question"
+                placeholder="Example: What should I learn first?"
+            >
+
+            <button onclick="askAI()">
+                Ask AI
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let learnerData = {};
+
+    let completedTasks = 0;
+
+    let totalTasks = 5;
+
+
+    function generatePath() {
+
+        const career =
+            document.getElementById("career").value.trim();
+
+        const skills =
+            document.getElementById("skills").value.trim();
+
+        const experience =
+            document.getElementById("experience").value;
+
+        const goal =
+            document.getElementById("goal").value.trim();
+
+
+        if (career === "") {
+
+            alert("Please enter your target career.");
+
+            return;
+        }
+
+
+        learnerData = {
+
+            career: career,
+
+            skills: skills,
+
+            experience: experience,
+
+            goal: goal
+
+        };
+
+
+        localStorage.setItem(
+            "edupathData",
+            JSON.stringify(learnerData)
+        );
+
+
+        document
+            .getElementById("profileSection")
+            .classList.add("hidden");
+
+
+        document
+            .getElementById("dashboard")
+            .classList.remove("hidden");
+
+
+        document.getElementById("showCareer")
+            .innerText = career;
+
+        document.getElementById("showExperience")
+            .innerText = experience;
+
+        document.getElementById("showGoal")
+            .innerText =
+            goal || "Build skills for my target career.";
+
+
+        generateSkills(skills);
+
+        generateSkillGaps(career, skills);
+
+        generateObjectives(career);
+
+        generateResources(career);
+
+        generateWeeklyPlan(career);
+
+        generatePractice(career);
+
+        generateProjects(career);
+
+        updateProgress();
+
+    }
+
+
+    function generateSkills(skills) {
+
+        const list =
+            document.getElementById("skillList");
+
+        list.innerHTML = "";
+
+
+        if (skills === "") {
+
+            list.innerHTML =
+                "<p>No current skills added.</p>";
+
+            return;
+        }
+
+
+        const skillArray =
+            skills.split(",");
+
+
+        skillArray.forEach(skill => {
+
+            const span =
+                document.createElement("span");
+
+            span.className = "skill";
+
+            span.innerText = skill.trim();
+
+            list.appendChild(span);
+
+        });
+
+    }
+
+
+    function generateSkillGaps(career, skills) {
+
+        const list =
+            document.getElementById("gapList");
+
+        list.innerHTML = "";
+
+
+        const gaps = [
+
+            "Problem Solving",
+
+            "Advanced Technical Skills",
+
+            "Real-world Projects",
+
+            "Interview Preparation",
+
+            "Industry Knowledge"
+
+        ];
+
+
+        gaps.forEach(gap => {
+
+            const div =
+                document.createElement("div");
+
+            div.className = "gap";
+
+            div.innerHTML =
+                "⚠️ " + gap;
+
+            list.appendChild(div);
+
+        });
+
+    }
+
+
+    function generateObjectives(career) {
+
+        const list =
+            document.getElementById("objectiveList");
+
+        list.innerHTML = "";
+
+
+        const objectives = [
+
+            "Understand the fundamentals of " + career,
+
+            "Develop practical technical skills",
+
+            "Solve real-world problems",
+
+            "Build portfolio projects",
+
+            "Prepare for interviews"
+
+        ];
+
+
+        objectives.forEach(objective => {
+
+            const div =
+                document.createElement("div");
+
+            div.className = "objective";
+
+            div.innerHTML =
+                "🎯 " + objective;
+
+            list.appendChild(div);
+
+        });
+
+    }
+
+
+    function generateResources(career) {
+
+        const list =
+            document.getElementById("resourceList");
+
+        list.innerHTML = "";
+
+
+        const resources = [
+
+            "📺 YouTube – Beginner tutorials for " + career,
+
+            "🎓 Coursera – Career-related courses",
+
+            "💻 freeCodeCamp – Technical practice",
+
+            "📚 Documentation – Official technical documentation",
+
+            "🧪 HackerRank – Practice problems"
+
+        ];
+
+
+        resources.forEach(resource => {
+
+            const div =
+                document.createElement("div");
+
+            div.className = "resource";
+
+            div.innerText = resource;
+
+            list.appendChild(div);
+
+        });
+
+    }
+
+
+    function generateWeeklyPlan(career) {
+
+        const list =
+            document.getElementById("weeklyPlan");
+
+        list.innerHTML = "";
+
+
+        const weeks = [
+
+            "Week 1 – Learn fundamentals",
+
+            "Week 2 – Practice core concepts",
+
+            "Week 3 – Solve practical problems",
+
+            "Week 4 – Build a mini project",
+
+            "Week 5 – Review and interview preparation"
+
+        ];
+
+
+        weeks.forEach((week, index) => {
+
+            const div =
+                document.createElement("div");
+
+            div.className = "week";
+
+
+            div.innerHTML = `
+
+                <label>
+
+                    <input
+                        type="checkbox"
+                        onchange="taskCompleted()"
+                    >
+
+                    ${week}
+
+                </label>
+
+            `;
+
+
+            list.appendChild(div);
+
+        });
+
+    }
+
+
+    function generatePractice(career) {
+
+        const list =
+            document.getElementById("practiceList");
+
+        list.innerHTML = "";
+
+
+        const tasks = [
+
+            "Solve 5 beginner problems",
+
+            "Explain one important concept",
+
+            "Build a small program",
+
+            "Analyze a real-world problem",
+
+            "Create a GitHub project"
+
+        ];
+
+
+        tasks.forEach(task => {
+
+            const div =
+                document.createElement("div");
+
+            div.className = "objective";
+
+            div.innerText =
+                "🧪 " + task;
+
+            list.appendChild(div);
+
+        });
+
+    }
+
+
+    function generateProjects(career) {
+
+        const list =
+            document.getElementById("projectList");
+
+        list.innerHTML = "";
+
+
+        const projects = [
+
+            "Beginner " + career + " project",
+
+            "Real-world problem solving project",
+
+            "Portfolio project",
+
+            "AI-powered project"
+
+        ];
+
+
+        projects.forEach(project => {
+
+            const div =
+                document.createElement("div");
+
+            div.className = "resource";
+
+            div.innerText =
+                "🚀 " + project;
+
+            list.appendChild(div);
+
+        });
+
+    }
+
+
+    function taskCompleted() {
+
+        const checkboxes =
+            document.querySelectorAll(
+                "#weeklyPlan input"
+            );
+
+
+        completedTasks = 0;
+
+
+        checkboxes.forEach(box => {
+
+            if (box.checked) {
+
+                completedTasks++;
+
             }
 
-            // Show next step
-            document.getElementById("nextStep").innerHTML = `
-                <h2>Great! 🎯</h2>
-                <p>Your goal is: <strong>${career}</strong></p>
-                <p>Let's create your learning path.</p>
-                <button onclick="startLearning()">Start Learning</button>
-            `;
+        });
+
+
+        updateProgress();
+
+    }
+
+
+    function updateProgress() {
+
+        const percentage =
+            Math.round(
+                (completedTasks / totalTasks) * 100
+            );
+
+
+        document.getElementById("progressBar")
+            .style.width =
+            percentage + "%";
+
+
+        document.getElementById("progressText")
+            .innerText =
+            percentage + "% completed";
+
+
+        document.getElementById("acquired")
+            .innerText =
+            percentage >= 60
+                ? "Fundamental skills are being acquired."
+                : "Start completing your weekly activities.";
+
+
+        document.getElementById("inProgress")
+            .innerText =
+            percentage + "% of your learning plan completed.";
+
+
+        document.getElementById("remainingGaps")
+            .innerText =
+            percentage < 100
+                ? "Some technical and practical skills still need development."
+                : "No major planned gaps remaining.";
+
+
+        document.getElementById("nextStep")
+            .innerText =
+            percentage < 100
+                ? "Continue with the next incomplete activity."
+                : "Start an advanced project and prepare for interviews.";
+
+    }
+
+
+    function askAI() {
+
+        const question =
+            document.getElementById("question")
+                .value.trim();
+
+
+        if (question === "") {
+
+            return;
+
         }
 
-        function startLearning() {
-            alert("Your personalized learning path is being created! 🚀");
+
+        const chat =
+            document.getElementById("chatBox");
+
+
+        const userMessage =
+            document.createElement("div");
+
+        userMessage.className =
+            "message user";
+
+        userMessage.innerText =
+            question;
+
+
+        chat.appendChild(userMessage);
+
+
+        let answer =
+            "Based on your learning path, focus on your current skill gaps and complete the weekly plan step by step.";
+
+
+        const lower =
+            question.toLowerCase();
+
+
+        if (lower.includes("first")) {
+
+            answer =
+                "Start with the fundamentals. Then move to practice, projects, and interview preparation.";
+
         }
-    </script>
+
+        else if (lower.includes("project")) {
+
+            answer =
+                "Build a small project first. After completing it, create a larger real-world portfolio project.";
+
+        }
+
+        else if (lower.includes("skill")) {
+
+            answer =
+                "Focus on the skill gaps shown above. Complete one skill at a time instead of learning everything together.";
+
+        }
+
+        else if (lower.includes("progress")) {
+
+            answer =
+                "Your progress is " +
+                Math.round(
+                    (completedTasks / totalTasks) * 100
+                ) +
+                "%. Continue completing the weekly tasks.";
+
+        }
+
+
+        setTimeout(() => {
+
+            const botMessage =
+                document.createElement("div");
+
+            botMessage.className =
+                "message bot";
+
+            botMessage.innerText =
+                answer;
+
+            chat.appendChild(botMessage);
+
+            chat.scrollTop =
+                chat.scrollHeight;
+
+        }, 500);
+
+
+        document.getElementById("question")
+            .value = "";
+
+    }
+
+
+    // Load saved profile
+
+    window.onload = function () {
+
+        const saved =
+            localStorage.getItem("edupathData");
+
+
+        if (saved) {
+
+            learnerData =
+                JSON.parse(saved);
+
+        }
+
+    };
+
+</script>
 
 </body>
+
 </html>
