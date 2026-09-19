@@ -1,1049 +1,573 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>EduPath AI</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f7fb;
-            color: #222;
-        }
-
-        header {
-            background: #2563eb;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        header h1 {
-            font-size: 32px;
-            margin-bottom: 8px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 30px auto;
-            padding: 20px;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            margin-bottom: 20px;
-            border-radius: 12px;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        h2 {
-            margin-bottom: 15px;
-            color: #2563eb;
-        }
-
-        h3 {
-            margin-bottom: 10px;
-        }
-
-        label {
-            display: block;
-            margin-top: 15px;
-            margin-bottom: 6px;
-            font-weight: bold;
-        }
-
-        input,
-        textarea,
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 7px;
-            font-size: 16px;
-        }
-
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        button {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 12px 22px;
-            border-radius: 7px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 15px;
-        }
-
-        button:hover {
-            background: #1d4ed8;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .skill {
-            display: inline-block;
-            background: #e0ecff;
-            color: #1d4ed8;
-            padding: 8px 12px;
-            border-radius: 20px;
-            margin: 5px;
-        }
-
-        .gap {
-            background: #fee2e2;
-            color: #b91c1c;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 7px;
-        }
-
-        .objective {
-            background: #ecfdf5;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 7px;
-        }
-
-        .resource {
-            background: #f8fafc;
-            border-left: 5px solid #2563eb;
-            padding: 15px;
-            margin: 10px 0;
-        }
-
-        .week {
-            background: #f8fafc;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-        }
-
-        .week input {
-            width: auto;
-            margin-right: 10px;
-        }
-
-        .progress-container {
-            background: #ddd;
-            border-radius: 20px;
-            height: 20px;
-            margin-top: 10px;
-        }
-
-        .progress-bar {
-            background: #2563eb;
-            height: 100%;
-            width: 0%;
-            border-radius: 20px;
-            transition: 0.5s;
-        }
-
-        .chat-box {
-            height: 250px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-        }
-
-        .message {
-            padding: 10px;
-            margin: 7px 0;
-            border-radius: 8px;
-        }
-
-        .user {
-            background: #dbeafe;
-            text-align: right;
-        }
-
-        .bot {
-            background: #f1f5f9;
-        }
-
-        .report {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EduPath AI — Multi-Agent Learning Coach</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,sans-serif;background:#f3f6fb;color:#172033}
+header{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;padding:28px 20px;text-align:center}
+header h1{margin:0 0 8px;font-size:34px}
+header p{margin:0;opacity:.92}
+.container{max-width:1100px;margin:24px auto;padding:0 16px}
+.card{background:#fff;border-radius:16px;padding:24px;margin-bottom:18px;box-shadow:0 5px 20px rgba(15,23,42,.08)}
+h2{margin:0 0 15px;color:#1d4ed8}
+h3{margin:12px 0 8px}
+label{display:block;font-weight:700;margin:14px 0 7px}
+input,textarea,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px}
+textarea{min-height:95px;resize:vertical}
+button{border:0;border-radius:9px;padding:12px 18px;background:#2563eb;color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+button:hover{background:#1d4ed8}
+button.secondary{background:#475569}
+button.danger{background:#dc2626}
+button:disabled{opacity:.55;cursor:not-allowed}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.hidden{display:none!important}
+.small{font-size:13px;color:#64748b}
+.notice{padding:12px;border-radius:10px;background:#eff6ff;border-left:4px solid #2563eb;margin:12px 0}
+.warning{background:#fff7ed;border-left-color:#f97316}
+.status{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:700}
+.agent-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.agent{border:1px solid #e2e8f0;border-radius:12px;padding:12px;background:#f8fafc}
+.agent.running{border-color:#60a5fa;background:#eff6ff}
+.agent.done{border-color:#86efac;background:#f0fdf4}
+.agent.error{border-color:#fca5a5;background:#fef2f2}
+.agent .name{font-weight:800}
+.agent .state{font-size:12px;color:#64748b;margin-top:5px}
+.skill-table{width:100%;border-collapse:collapse;margin-top:10px}
+.skill-table th,.skill-table td{padding:10px;border-bottom:1px solid #e2e8f0;text-align:left;font-size:14px}
+.pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#dbeafe;color:#1d4ed8;margin:3px;font-size:13px}
+.gap{padding:14px;border-radius:11px;margin:9px 0;background:#fff7ed;border-left:4px solid #f59e0b}
+.objective,.resource,.task,.project,.week{padding:14px;border:1px solid #e2e8f0;border-radius:11px;margin:9px 0;background:#f8fafc}
+.resource a{color:#1d4ed8;font-weight:700}
+.week{background:#fff}
+.week-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.check{display:flex;align-items:flex-start;gap:9px;margin:9px 0}
+.check input{width:auto;margin-top:3px}
+.progress-wrap{height:22px;background:#e2e8f0;border-radius:999px;overflow:hidden}
+.progress-bar{height:100%;width:0;background:linear-gradient(90deg,#2563eb,#7c3aed);transition:.4s}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.metric{padding:15px;border-radius:12px;background:#f8fafc;text-align:center}
+.metric b{font-size:24px;color:#1d4ed8;display:block}
+.chat{height:300px;overflow:auto;border:1px solid #e2e8f0;border-radius:11px;padding:12px}
+.msg{padding:10px 12px;border-radius:11px;margin:8px 0;max-width:85%;white-space:pre-wrap}
+.msg.user{background:#dbeafe;margin-left:auto}
+.msg.bot{background:#f1f5f9}
+.loading{display:inline-block;width:15px;height:15px;border:2px solid #cbd5e1;border-top-color:#2563eb;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+footer{text-align:center;color:#64748b;padding:25px}
+@media(max-width:800px){.row,.agent-grid,.metric-grid{grid-template-columns:1fr}.container{padding:0 10px}}
+</style>
 </head>
-
 <body>
-
 <header>
-    <h1>EduPath AI 🤖</h1>
-    <p>Your Personal Learning & Skill Gap Agent</p>
+  <h1>EduPath AI 🤖</h1>
+  <p>Multi-Agent Personalized Learning & Skill Gap Coach</p>
 </header>
-
 
 <div class="container">
 
-    <!-- PROFILE -->
-
-    <div class="card" id="profileSection">
-
-        <h2>🎯 Create Your Learning Profile</h2>
-
-        <label>What do you want to become?</label>
-
-        <input
-            type="text"
-            id="career"
-            placeholder="Example: Quant Analyst"
-        >
-
-        <label>Current Skills</label>
-
-        <input
-            type="text"
-            id="skills"
-            placeholder="Example: Python, Mathematics, Excel"
-        >
-
-        <label>Experience Level</label>
-
-        <select id="experience">
-
-            <option value="Beginner">Beginner</option>
-
-            <option value="Intermediate">
-                Intermediate
-            </option>
-
-            <option value="Advanced">
-                Advanced
-            </option>
-
-        </select>
-
-
-        <label>Career Goal</label>
-
-        <textarea
-            id="goal"
-            placeholder="Describe your career goal..."
-        ></textarea>
-
-
-        <label>Upload Resume / Project Description</label>
-
-        <input
-            type="file"
-            id="resume"
-            accept=".txt,.pdf,.doc,.docx"
-        >
-
-
-        <button onclick="generatePath()">
-            Generate My Learning Path 🚀
-        </button>
-
+<div class="card" id="setupCard">
+  <h2>🎯 Create Your Learning Profile</h2>
+  <div class="notice">
+    <b>AI Agent Mode:</b> EduPath uses multiple specialist agents to analyze your profile, find skill gaps, build a learning plan, recommend resources, create practice/projects, and adapt your path.
+  </div>
+  <div class="row">
+    <div>
+      <label>Target Career / Role</label>
+      <input id="career" placeholder="Example: Data Engineer">
     </div>
-
-
-    <!-- DASHBOARD -->
-
-    <div id="dashboard" class="hidden">
-
-        <!-- PROFILE SUMMARY -->
-
-        <div class="card">
-
-            <h2>👤 Your Profile</h2>
-
-            <p>
-                <strong>Target Role:</strong>
-                <span id="showCareer"></span>
-            </p>
-
-            <p>
-                <strong>Experience:</strong>
-                <span id="showExperience"></span>
-            </p>
-
-            <p>
-                <strong>Goal:</strong>
-                <span id="showGoal"></span>
-            </p>
-
-        </div>
-
-
-        <!-- CURRENT SKILLS -->
-
-        <div class="card">
-
-            <h2>💡 Your Current Skills</h2>
-
-            <div id="skillList"></div>
-
-        </div>
-
-
-        <!-- SKILL GAP -->
-
-        <div class="card">
-
-            <h2>🔍 Skill Gap Analysis</h2>
-
-            <p>
-                Based on your target role, EduPath AI identified
-                the following areas to develop:
-            </p>
-
-            <div id="gapList"></div>
-
-        </div>
-
-
-        <!-- LEARNING OBJECTIVES -->
-
-        <div class="card">
-
-            <h2>📚 Learning Objectives</h2>
-
-            <div id="objectiveList"></div>
-
-        </div>
-
-
-        <!-- RESOURCES -->
-
-        <div class="card">
-
-            <h2>🌐 Recommended Learning Resources</h2>
-
-            <div id="resourceList"></div>
-
-        </div>
-
-
-        <!-- WEEKLY PLAN -->
-
-        <div class="card">
-
-            <h2>📅 Personalized Weekly Plan</h2>
-
-            <p>
-                Complete the activities below to update your progress.
-            </p>
-
-            <div id="weeklyPlan"></div>
-
-        </div>
-
-
-        <!-- PRACTICE -->
-
-        <div class="card">
-
-            <h2>🧪 Practice Tasks</h2>
-
-            <div id="practiceList"></div>
-
-        </div>
-
-
-        <!-- PROJECT -->
-
-        <div class="card">
-
-            <h2>🚀 Project Ideas</h2>
-
-            <div id="projectList"></div>
-
-        </div>
-
-
-        <!-- PROGRESS -->
-
-        <div class="card">
-
-            <h2>📊 Learning Progress</h2>
-
-            <p id="progressText">
-                0% completed
-            </p>
-
-            <div class="progress-container">
-
-                <div
-                    class="progress-bar"
-                    id="progressBar">
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- REPORT -->
-
-        <div class="card">
-
-            <h2>📈 Progress Report</h2>
-
-            <div class="report">
-
-                <p>
-                    <strong>Skills Acquired:</strong>
-                </p>
-
-                <p id="acquired">
-                    Complete activities to acquire skills.
-                </p>
-
-                <br>
-
-                <p>
-                    <strong>Skills In Progress:</strong>
-                </p>
-
-                <p id="inProgress"></p>
-
-                <br>
-
-                <p>
-                    <strong>Remaining Gaps:</strong>
-                </p>
-
-                <p id="remainingGaps"></p>
-
-                <br>
-
-                <p>
-                    <strong>Recommended Next Step:</strong>
-                </p>
-
-                <p id="nextStep"></p>
-
-            </div>
-
-        </div>
-
-
-        <!-- AI CHAT -->
-
-        <div class="card">
-
-            <h2>🤖 Ask EduPath AI</h2>
-
-            <div
-                class="chat-box"
-                id="chatBox">
-
-                <div class="message bot">
-                    Hello! 👋 Ask me anything about your
-                    learning journey.
-                </div>
-
-            </div>
-
-
-            <input
-                type="text"
-                id="question"
-                placeholder="Example: What should I learn first?"
-            >
-
-            <button onclick="askAI()">
-                Ask AI
-            </button>
-
-        </div>
-
+    <div>
+      <label>Experience Level</label>
+      <select id="experience">
+        <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+      </select>
     </div>
+  </div>
+  <label>Current Skills</label>
+  <input id="skills" placeholder="Example: SQL, Python, Excel">
+  <label>Career Goal</label>
+  <textarea id="goal" placeholder="Example: Become job-ready for a data engineering role in 6 months."></textarea>
+  <label>Resume / Portfolio / Project Description</label>
+  <input type="file" id="resume" accept=".txt,.pdf,.doc,.docx">
+  <p class="small">For the AI demo, PDF/TXT files can be analyzed by the model. Keep the file reasonably small (about 6 MB or less).</p>
 
+  <div class="card" style="background:#f8fafc;margin-top:18px;margin-bottom:0;padding:18px">
+    <h3>🔑 Gemini AI Connection</h3>
+    <p class="small">For a GitHub Pages hackathon demo, you can enter a Gemini API key here. The key is used only in your browser and is not stored by this page. For a real production deployment, move the API call to a secure backend/serverless function.</p>
+    <input id="apiKey" type="password" placeholder="Paste your Gemini API key for real AI agents">
+    <div style="margin-top:10px">
+      <button class="secondary" onclick="toggleKey()">Show / Hide Key</button>
+    </div>
+  </div>
+
+  <button id="generateBtn" onclick="startEduPath()">🚀 Generate My AI Learning Path</button>
+  <button class="secondary" onclick="loadDemoProfile()">Try Demo Profile</button>
 </div>
 
+<div id="agentsCard" class="card hidden">
+  <h2>🧠 EduPath Agent Team</h2>
+  <div class="agent-grid">
+    <div class="agent" id="a-profile"><div class="name">👤 Profile Analyst</div><div class="state">Waiting</div></div>
+    <div class="agent" id="a-gap"><div class="name">🔍 Skill Gap Analyst</div><div class="state">Waiting</div></div>
+    <div class="agent" id="a-plan"><div class="name">📅 Learning Planner</div><div class="state">Waiting</div></div>
+    <div class="agent" id="a-resource"><div class="name">🌐 Resource Curator</div><div class="state">Waiting</div></div>
+    <div class="agent" id="a-practice"><div class="name">🧪 Practice & Project Agent</div><div class="state">Waiting</div></div>
+    <div class="agent" id="a-coach"><div class="name">🔄 Adaptive Coach</div><div class="state">Waiting</div></div>
+  </div>
+  <p id="agentMessage" class="small" style="margin-top:12px"></p>
+</div>
+
+<div id="dashboard" class="hidden">
+
+<div class="card">
+  <h2>👤 Your AI-Analyzed Profile</h2>
+  <div id="profileSummary"></div>
+</div>
+
+<div class="card">
+  <h2>💡 Current Skills</h2>
+  <div id="skillList"></div>
+</div>
+
+<div class="card">
+  <h2>🔍 Personalized Skill Gap Analysis</h2>
+  <p class="small">The gap agent compares your current profile with the capabilities normally needed for the target role.</p>
+  <div id="gapList"></div>
+</div>
+
+<div class="card">
+  <h2>📚 Learning Objectives</h2>
+  <div id="objectiveList"></div>
+</div>
+
+<div class="card">
+  <h2>🌐 Recommended Learning Resources</h2>
+  <div id="resourceList"></div>
+</div>
+
+<div class="card">
+  <h2>📅 Personalized Weekly Plan</h2>
+  <p class="small">Tick activities as you complete them. EduPath will update progress and generate an adaptive recommendation.</p>
+  <div id="weeklyPlan"></div>
+</div>
+
+<div class="card">
+  <h2>🧪 Practice Tasks</h2>
+  <div id="practiceList"></div>
+</div>
+
+<div class="card">
+  <h2>🚀 Project Ideas</h2>
+  <div id="projectList"></div>
+</div>
+
+<div class="card">
+  <h2>📊 Learning Progress</h2>
+  <div class="metric-grid">
+    <div class="metric"><b id="progressPct">0%</b>Overall</div>
+    <div class="metric"><b id="completedCount">0</b>Completed</div>
+    <div class="metric"><b id="inProgressCount">0</b>In Progress</div>
+    <div class="metric"><b id="remainingCount">0</b>Remaining</div>
+  </div>
+  <div class="progress-wrap" style="margin-top:14px"><div class="progress-bar" id="progressBar"></div></div>
+  <p id="struggleBox" class="notice hidden"></p>
+</div>
+
+<div class="card">
+  <h2>📈 AI Progress Report</h2>
+  <div id="report" class="report"></div>
+</div>
+
+<div class="card">
+  <h2>🤖 Ask EduPath AI</h2>
+  <div id="chatBox" class="chat">
+    <div class="msg bot">Hello! 👋 I know your target role, skills, gaps and learning plan. Ask me what to learn next, why a skill matters, or how to handle a difficult topic.</div>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <input id="question" placeholder="Example: I am struggling with Python. What should I do?">
+    <button onclick="askAI()">Ask AI</button>
+  </div>
+</div>
+
+<button class="secondary" onclick="editProfile()">✏️ Edit Profile / Regenerate</button>
+</div>
+</div>
+
+<footer>EduPath AI • Hackathon prototype • Multi-agent learning orchestration</footer>
 
 <script>
-
-    let learnerData = {};
-
-    let completedTasks = 0;
-
-    let totalTasks = 5;
-
-
-    function generatePath() {
-
-        const career =
-            document.getElementById("career").value.trim();
-
-        const skills =
-            document.getElementById("skills").value.trim();
-
-        const experience =
-            document.getElementById("experience").value;
-
-        const goal =
-            document.getElementById("goal").value.trim();
-
-
-        if (career === "") {
-
-            alert("Please enter your target career.");
-
-            return;
-        }
-
-
-        learnerData = {
-
-            career: career,
-
-            skills: skills,
-
-            experience: experience,
-
-            goal: goal
-
-        };
-
-
-        localStorage.setItem(
-            "edupathData",
-            JSON.stringify(learnerData)
-        );
-
-
-        document
-            .getElementById("profileSection")
-            .classList.add("hidden");
-
-
-        document
-            .getElementById("dashboard")
-            .classList.remove("hidden");
-
-
-        document.getElementById("showCareer")
-            .innerText = career;
-
-        document.getElementById("showExperience")
-            .innerText = experience;
-
-        document.getElementById("showGoal")
-            .innerText =
-            goal || "Build skills for my target career.";
-
-
-        generateSkills(skills);
-
-        generateSkillGaps(career, skills);
-
-        generateObjectives(career);
-
-        generateResources(career);
-
-        generateWeeklyPlan(career);
-
-        generatePractice(career);
-
-        generateProjects(career);
-
-        updateProgress();
-
-    }
-
-
-    function generateSkills(skills) {
-
-        const list =
-            document.getElementById("skillList");
-
-        list.innerHTML = "";
-
-
-        if (skills === "") {
-
-            list.innerHTML =
-                "<p>No current skills added.</p>";
-
-            return;
-        }
-
-
-        const skillArray =
-            skills.split(",");
-
-
-        skillArray.forEach(skill => {
-
-            const span =
-                document.createElement("span");
-
-            span.className = "skill";
-
-            span.innerText = skill.trim();
-
-            list.appendChild(span);
-
-        });
-
-    }
-
-
-    function generateSkillGaps(career, skills) {
-
-        const list =
-            document.getElementById("gapList");
-
-        list.innerHTML = "";
-
-
-        const gaps = [
-
-            "Problem Solving",
-
-            "Advanced Technical Skills",
-
-            "Real-world Projects",
-
-            "Interview Preparation",
-
-            "Industry Knowledge"
-
-        ];
-
-
-        gaps.forEach(gap => {
-
-            const div =
-                document.createElement("div");
-
-            div.className = "gap";
-
-            div.innerHTML =
-                "⚠️ " + gap;
-
-            list.appendChild(div);
-
-        });
-
-    }
-
-
-    function generateObjectives(career) {
-
-        const list =
-            document.getElementById("objectiveList");
-
-        list.innerHTML = "";
-
-
-        const objectives = [
-
-            "Understand the fundamentals of " + career,
-
-            "Develop practical technical skills",
-
-            "Solve real-world problems",
-
-            "Build portfolio projects",
-
-            "Prepare for interviews"
-
-        ];
-
-
-        objectives.forEach(objective => {
-
-            const div =
-                document.createElement("div");
-
-            div.className = "objective";
-
-            div.innerHTML =
-                "🎯 " + objective;
-
-            list.appendChild(div);
-
-        });
-
-    }
-
-
-    function generateResources(career) {
-
-        const list =
-            document.getElementById("resourceList");
-
-        list.innerHTML = "";
-
-
-        const resources = [
-
-            "📺 YouTube – Beginner tutorials for " + career,
-
-            "🎓 Coursera – Career-related courses",
-
-            "💻 freeCodeCamp – Technical practice",
-
-            "📚 Documentation – Official technical documentation",
-
-            "🧪 HackerRank – Practice problems"
-
-        ];
-
-
-        resources.forEach(resource => {
-
-            const div =
-                document.createElement("div");
-
-            div.className = "resource";
-
-            div.innerText = resource;
-
-            list.appendChild(div);
-
-        });
-
-    }
-
-
-    function generateWeeklyPlan(career) {
-
-        const list =
-            document.getElementById("weeklyPlan");
-
-        list.innerHTML = "";
-
-
-        const weeks = [
-
-            "Week 1 – Learn fundamentals",
-
-            "Week 2 – Practice core concepts",
-
-            "Week 3 – Solve practical problems",
-
-            "Week 4 – Build a mini project",
-
-            "Week 5 – Review and interview preparation"
-
-        ];
-
-
-        weeks.forEach((week, index) => {
-
-            const div =
-                document.createElement("div");
-
-            div.className = "week";
-
-
-            div.innerHTML = `
-
-                <label>
-
-                    <input
-                        type="checkbox"
-                        onchange="taskCompleted()"
-                    >
-
-                    ${week}
-
-                </label>
-
-            `;
-
-
-            list.appendChild(div);
-
-        });
-
-    }
-
-
-    function generatePractice(career) {
-
-        const list =
-            document.getElementById("practiceList");
-
-        list.innerHTML = "";
-
-
-        const tasks = [
-
-            "Solve 5 beginner problems",
-
-            "Explain one important concept",
-
-            "Build a small program",
-
-            "Analyze a real-world problem",
-
-            "Create a GitHub project"
-
-        ];
-
-
-        tasks.forEach(task => {
-
-            const div =
-                document.createElement("div");
-
-            div.className = "objective";
-
-            div.innerText =
-                "🧪 " + task;
-
-            list.appendChild(div);
-
-        });
-
-    }
-
-
-    function generateProjects(career) {
-
-        const list =
-            document.getElementById("projectList");
-
-        list.innerHTML = "";
-
-
-        const projects = [
-
-            "Beginner " + career + " project",
-
-            "Real-world problem solving project",
-
-            "Portfolio project",
-
-            "AI-powered project"
-
-        ];
-
-
-        projects.forEach(project => {
-
-            const div =
-                document.createElement("div");
-
-            div.className = "resource";
-
-            div.innerText =
-                "🚀 " + project;
-
-            list.appendChild(div);
-
-        });
-
-    }
-
-
-    function taskCompleted() {
-
-        const checkboxes =
-            document.querySelectorAll(
-                "#weeklyPlan input"
-            );
-
-
-        completedTasks = 0;
-
-
-        checkboxes.forEach(box => {
-
-            if (box.checked) {
-
-                completedTasks++;
-
-            }
-
-        });
-
-
-        updateProgress();
-
-    }
-
-
-    function updateProgress() {
-
-        const percentage =
-            Math.round(
-                (completedTasks / totalTasks) * 100
-            );
-
-
-        document.getElementById("progressBar")
-            .style.width =
-            percentage + "%";
-
-
-        document.getElementById("progressText")
-            .innerText =
-            percentage + "% completed";
-
-
-        document.getElementById("acquired")
-            .innerText =
-            percentage >= 60
-                ? "Fundamental skills are being acquired."
-                : "Start completing your weekly activities.";
-
-
-        document.getElementById("inProgress")
-            .innerText =
-            percentage + "% of your learning plan completed.";
-
-
-        document.getElementById("remainingGaps")
-            .innerText =
-            percentage < 100
-                ? "Some technical and practical skills still need development."
-                : "No major planned gaps remaining.";
-
-
-        document.getElementById("nextStep")
-            .innerText =
-            percentage < 100
-                ? "Continue with the next incomplete activity."
-                : "Start an advanced project and prepare for interviews.";
-
-    }
-
-
-    function askAI() {
-
-        const question =
-            document.getElementById("question")
-                .value.trim();
-
-
-        if (question === "") {
-
-            return;
-
-        }
-
-
-        const chat =
-            document.getElementById("chatBox");
-
-
-        const userMessage =
-            document.createElement("div");
-
-        userMessage.className =
-            "message user";
-
-        userMessage.innerText =
-            question;
-
-
-        chat.appendChild(userMessage);
-
-
-        let answer =
-            "Based on your learning path, focus on your current skill gaps and complete the weekly plan step by step.";
-
-
-        const lower =
-            question.toLowerCase();
-
-
-        if (lower.includes("first")) {
-
-            answer =
-                "Start with the fundamentals. Then move to practice, projects, and interview preparation.";
-
-        }
-
-        else if (lower.includes("project")) {
-
-            answer =
-                "Build a small project first. After completing it, create a larger real-world portfolio project.";
-
-        }
-
-        else if (lower.includes("skill")) {
-
-            answer =
-                "Focus on the skill gaps shown above. Complete one skill at a time instead of learning everything together.";
-
-        }
-
-        else if (lower.includes("progress")) {
-
-            answer =
-                "Your progress is " +
-                Math.round(
-                    (completedTasks / totalTasks) * 100
-                ) +
-                "%. Continue completing the weekly tasks.";
-
-        }
-
-
-        setTimeout(() => {
-
-            const botMessage =
-                document.createElement("div");
-
-            botMessage.className =
-                "message bot";
-
-            botMessage.innerText =
-                answer;
-
-            chat.appendChild(botMessage);
-
-            chat.scrollTop =
-                chat.scrollHeight;
-
-        }, 500);
-
-
-        document.getElementById("question")
-            .value = "";
-
-    }
-
-
-    // Load saved profile
-
-    window.onload = function () {
-
-        const saved =
-            localStorage.getItem("edupathData");
-
-
-        if (saved) {
-
-            learnerData =
-                JSON.parse(saved);
-
-        }
-
+const MODEL = "gemini-3.5-flash";
+let state = {
+  profile:{}, analysis:null, plan:null, resources:null, practice:null,
+  progress:{}, resumeText:"", aiEnabled:false
+};
+
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+function toggleKey(){ $("apiKey").type=$("apiKey").type==="password"?"text":"password" }
+function agent(id,status,textMsg){
+  const el=$(id); el.className="agent "+status;
+  el.querySelector(".state").innerHTML=textMsg || status;
+}
+function setAgentMsg(t){$("agentMessage").textContent=t}
+
+function loadDemoProfile(){
+  $("career").value="Data Engineer";
+  $("skills").value="SQL";
+  $("experience").value="Intermediate";
+  $("goal").value="Become job-ready for a data engineering role and build a strong portfolio.";
+  $("apiKey").value="";
+}
+
+async function readResume(){
+  const f=$("resume").files[0];
+  if(!f) return {text:"",part:null,name:""};
+  if(f.size>6*1024*1024) throw new Error("Resume file is larger than 6 MB. Please upload a smaller file.");
+  const name=f.name;
+  if(f.type==="text/plain" || name.toLowerCase().endsWith(".txt")){
+    return {text:await f.text(),part:null,name};
+  }
+  const data=await new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(String(r.result).split(",")[1]);
+    r.onerror=reject;
+    r.readAsDataURL(f);
+  });
+  return {text:"[Resume attached as "+f.type+" file]",part:{inline_data:{mime_type:f.type||"application/octet-stream",data}},name};
+}
+
+async function gemini(prompt, extraPart=null, system="You are a helpful AI learning agent."){
+  const key=$("apiKey").value.trim();
+  if(!key) throw new Error("No Gemini API key. Add a key to use live AI agents.");
+  const parts=[{text:prompt}];
+  if(extraPart) parts.push(extraPart);
+  const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+MODEL+":generateContent",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","x-goog-api-key":key},
+    body:JSON.stringify({
+      systemInstruction:{parts:[{text:system}]},
+      contents:[{role:"user",parts}],
+      generationConfig:{temperature:.35,responseMimeType:"application/json"}
+    })
+  });
+  const data=await res.json();
+  if(!res.ok) throw new Error(data?.error?.message || "Gemini request failed");
+  const text=data?.candidates?.[0]?.content?.parts?.map(p=>p.text||"").join("")||"";
+  try{return JSON.parse(text)}catch(e){
+    const clean=text.replace(/^```json/i,"").replace(/```$/,"").trim();
+    try{return JSON.parse(clean)}catch(_){throw new Error("AI returned invalid JSON. Please try again.")}
+  }
+}
+
+function demoData(){
+  const role=state.profile.career.toLowerCase();
+  if(role.includes("data engineer")){
+    return {
+      gaps:[
+        {skill:"Python for Data Engineering",current_level:"Beginner",required_level:"Advanced",priority:"High",reason:"Python is commonly used for ETL, automation and data pipelines."},
+        {skill:"Advanced SQL",current_level:"Intermediate",required_level:"Advanced",priority:"Medium",reason:"Move from basic querying to CTEs, window functions and optimization."},
+        {skill:"ETL / ELT Pipelines",current_level:"Beginner",required_level:"Advanced",priority:"High",reason:"Core data-engineering work involves building reliable pipelines."},
+        {skill:"Data Warehousing",current_level:"Beginner",required_level:"Intermediate",priority:"High",reason:"Warehousing concepts are important for analytics platforms."},
+        {skill:"Apache Spark",current_level:"Beginner",required_level:"Intermediate",priority:"Medium",reason:"Distributed processing is useful for large datasets."},
+        {skill:"Cloud Data Services",current_level:"Beginner",required_level:"Intermediate",priority:"Medium",reason:"Modern data engineering commonly uses cloud storage and compute."}
+      ],
+      objectives:[
+        "Write production-style Python for data processing",
+        "Use advanced SQL including CTEs and window functions",
+        "Design an end-to-end ETL/ELT pipeline",
+        "Understand data warehouses, facts, dimensions and partitioning",
+        "Process larger datasets with Spark",
+        "Deploy a small pipeline using a cloud platform"
+      ],
+      resources:[
+        {title:"Python documentation",type:"Documentation",why:"Reference for Python syntax and standard library",query:"Python official documentation"},
+        {title:"SQL practice",type:"Practice",why:"Practice queries and database problems",query:"SQL practice HackerRank"},
+        {title:"Apache Spark",type:"Documentation",why:"Learn distributed data processing",query:"Apache Spark official documentation"},
+        {title:"Data engineering learning",type:"Course",why:"Structured learning path for data engineering",query:"data engineering course"},
+        {title:"Cloud data engineering",type:"Learning",why:"Learn cloud storage, compute and data services",query:"cloud data engineering learning"}
+      ],
+      weeks:[
+        {week:"Week 1",focus:"Python for data engineering",tasks:["Python data structures","File and CSV processing","10 Python exercises"]},
+        {week:"Week 2",focus:"Advanced SQL",tasks:["CTEs","Window functions","Query optimization practice"]},
+        {week:"Week 3",focus:"ETL/ELT",tasks:["Design pipeline","Build extraction step","Build transformation step"]},
+        {week:"Week 4",focus:"Warehouse + Spark",tasks:["Star schema","Partitioning","Spark DataFrame mini-task"]},
+        {week:"Week 5",focus:"Portfolio project",tasks:["Build end-to-end pipeline","Document architecture","Publish GitHub project"]}
+      ],
+      practice:[
+        "Write a Python script that reads a CSV, cleans null values and writes a new file.",
+        "Solve 5 SQL problems using joins, CTEs and window functions.",
+        "Design an ETL pipeline for daily sales data.",
+        "Create a star schema for an e-commerce dataset.",
+        "Process a medium-sized dataset with Spark."
+      ],
+      projects:[
+        {title:"End-to-End Sales Data Pipeline",description:"Build a pipeline from raw CSV/API data to a cleaned warehouse-style dataset.",skills:["Python","SQL","ETL","Data Warehousing"]},
+        {title:"Real-Time Streaming Mini Project",description:"Build a small streaming pipeline and visualize processed events.",skills:["Python","Spark","Streaming"]},
+        {title:"Cloud Data Platform Portfolio",description:"Store raw data, transform it and document the architecture.",skills:["Cloud","SQL","ETL"]}
+      ]
     };
+  }
+  return {
+    gaps:[
+      {skill:"Core Technical Skills",current_level:"Beginner",required_level:"Advanced",priority:"High",reason:"The target role requires deeper role-specific technical knowledge."},
+      {skill:"Problem Solving",current_level:"Beginner",required_level:"Advanced",priority:"High",reason:"Practical problem solving is needed to apply technical skills."},
+      {skill:"Projects",current_level:"Beginner",required_level:"Intermediate",priority:"Medium",reason:"Projects provide evidence of applied learning."},
+      {skill:"Interview Readiness",current_level:"Beginner",required_level:"Intermediate",priority:"Medium",reason:"Interview practice helps demonstrate role readiness."}
+    ],
+    objectives:[
+      "Learn the core concepts required for the target role",
+      "Practice role-specific problems every week",
+      "Build at least one portfolio project",
+      "Review weak areas using short assessments",
+      "Prepare role-specific interview questions"
+    ],
+    resources:[
+      {title:"Official documentation",type:"Documentation",why:"Use primary technical references",query:state.profile.career+" official documentation"},
+      {title:"Structured courses",type:"Course",why:"Build concepts in sequence",query:state.profile.career+" course for beginners"},
+      {title:"Practice problems",type:"Practice",why:"Apply concepts through exercises",query:state.profile.career+" practice problems"},
+      {title:"Project ideas",type:"Projects",why:"Create evidence of applied skills",query:state.profile.career+" portfolio projects"}
+    ],
+    weeks:[
+      {week:"Week 1",focus:"Core foundations",tasks:["Learn key concepts","Take a short quiz","Summarize what you learned"]},
+      {week:"Week 2",focus:"Technical practice",tasks:["Solve 5 role-specific problems","Review mistakes","Repeat weak topic"]},
+      {week:"Week 3",focus:"Applied learning",tasks:["Start a mini project","Document approach","Test the project"]},
+      {week:"Week 4",focus:"Portfolio",tasks:["Finish project","Write README","Publish project"]},
+      {week:"Week 5",focus:"Interview readiness",tasks:["Practice questions","Explain your project","Review gaps"]}
+    ],
+    practice:["Solve 5 role-specific beginner problems.","Explain one important concept without notes.","Build a small working prototype.","Analyze one real-world problem.","Create or improve a GitHub project."],
+    projects:[
+      {title:"Starter Portfolio Project",description:"Build a small project that demonstrates your core role skills.",skills:["Core skills","Problem solving"]},
+      {title:"Real-World Challenge",description:"Solve a practical problem using the tools required for the target role.",skills:["Technical skills","Applied learning"]},
+      {title:"AI-Assisted Project",description:"Create a useful AI-powered feature related to the target role.",skills:["AI","Role skills","Product thinking"]}
+    ]
+  };
+}
 
+async function startEduPath(){
+  const career=$("career").value.trim();
+  const skills=$("skills").value.trim();
+  const experience=$("experience").value;
+  const goal=$("goal").value.trim();
+  if(!career){alert("Please enter your target career.");return}
+  $("generateBtn").disabled=true;
+  $("agentsCard").classList.remove("hidden");
+  $("dashboard").classList.add("hidden");
+  setAgentMsg("Starting the agent team...");
+  agent("a-profile","running","Analyzing profile…");
+  agent("a-gap","","Waiting");
+  agent("a-plan","","Waiting");
+  agent("a-resource","","Waiting");
+  agent("a-practice","","Waiting");
+  agent("a-coach","","Waiting");
+
+  state.profile={career,skills,experience,goal};
+  let resume={text:"",part:null,name:""};
+  try{resume=await readResume()}catch(e){alert(e.message);$("generateBtn").disabled=false;return}
+  state.resumeText=resume.text;
+
+  const key=$("apiKey").value.trim();
+  state.aiEnabled=!!key;
+
+  try{
+    let profileResult;
+    if(key){
+      profileResult=await gemini(
+        `Analyze this learner for a personalized learning system.
+Return JSON with: summary (string), extracted_skills (array of strings), evidence (array of strings), assumptions (array of strings).
+Learner input:
+Target role: ${career}
+Current skills: ${skills||"not provided"}
+Experience: ${experience}
+Goal: ${goal||"not provided"}
+Resume/project content may be attached. Do not invent qualifications.`,
+        resume.part,
+        "You are the Profile Analyst agent. Extract only evidence-supported learner information. Be concise and accurate."
+      );
+    }else{
+      profileResult={summary:`Learner targeting ${career} with ${experience} experience.`,extracted_skills:skills?skills.split(",").map(s=>s.trim()).filter(Boolean):[],evidence:resume.text?["Resume/project supplied."]:[],assumptions:[]};
+    }
+    state.profile.aiSummary=profileResult;
+    agent("a-profile","done","✓ Complete");
+
+    const profileContext=JSON.stringify({profile:state.profile,profileAnalysis:profileResult});
+    agent("a-gap","running","Finding gaps…");
+    let gapResult;
+    if(key){
+      gapResult=await gemini(
+        `${profileContext}
+Identify the most important skill gaps for the target role.
+Return JSON: {gaps:[{skill,current_level,required_level,priority,reason}],objectives:[string]}.
+Use 5-8 gaps. Do not simply list generic soft skills; make them role-specific.`,
+        null,
+        "You are the Skill Gap Analyst agent. Compare current evidence with target-role capability requirements and explain the gap."
+      );
+    }else gapResult=demoData();
+    state.analysis=gapResult;
+    agent("a-gap","done","✓ Complete");
+
+    agent("a-plan","running","Building sequence…");
+    agent("a-resource","running","Curating resources…");
+    agent("a-practice","running","Creating practice & projects…");
+
+    if(key){
+      const gapContext=JSON.stringify({profile:state.profile,gaps:gapResult.gaps,objectives:gapResult.objectives});
+      const [plan,resources,practice]=await Promise.all([
+        gemini(`${gapContext}
+Create a realistic 5-week learning plan. Return JSON {weeks:[{week,focus,tasks:[string]}]}. Order prerequisites before advanced topics. Make tasks measurable.`,
+          null,"You are the Learning Planner agent. Sequence learning from prerequisite to applied skill and adapt it to the learner's current level."),
+        gemini(`${gapContext}
+Recommend 6-8 useful learning resources. Return JSON {resources:[{title,type,why,query}]}. Use resource types such as Documentation, Course, Video, Practice, Project. Give search queries instead of invented URLs.`,
+          null,"You are the Resource Curator agent. Recommend practical, reputable resource types and search queries. Never fabricate a URL."),
+        gemini(`${gapContext}
+Create 5 practice tasks and 3 portfolio projects. Return JSON {practice:[string],projects:[{title,description,skills:[string]}]}. Make them specific to the target role and gaps.`,
+          null,"You are the Practice and Project Agent. Turn skill gaps into hands-on tasks and portfolio projects.")
+      ]);
+      state.plan=plan; state.resources=resources; state.practice=practice;
+    }else{
+      const d=demoData(); state.plan={weeks:d.weeks}; state.resources={resources:d.resources}; state.practice={practice:d.practice,projects:d.projects};
+    }
+    agent("a-plan","done","✓ Complete");
+    agent("a-resource","done","✓ Complete");
+    agent("a-practice","done","✓ Complete");
+
+    agent("a-coach","running","Creating adaptive baseline…");
+    state.progress=JSON.parse(localStorage.getItem("edupathProgress")||"{}");
+    renderDashboard();
+    agent("a-coach","done","✓ Ready");
+    setAgentMsg(state.aiEnabled ? "All specialist agents completed. Your path is personalized by Gemini AI." : "Demo mode completed. Add a Gemini API key to run the real specialist agents.");
+    $("generateBtn").disabled=false;
+  }catch(e){
+    console.error(e);
+    setAgentMsg("AI agent error: "+e.message);
+    agent("a-profile","error","Error");
+    alert("The AI agent could not complete the request.\n\n"+e.message+"\n\nYou can remove the API key to use the built-in demo mode.");
+    $("generateBtn").disabled=false;
+  }
+}
+
+function renderDashboard(){
+  $("dashboard").classList.remove("hidden");
+  $("profileSummary").innerHTML=`
+    <p><b>Target Role:</b> ${esc(state.profile.career)}</p>
+    <p><b>Experience:</b> ${esc(state.profile.experience)}</p>
+    <p><b>Goal:</b> ${esc(state.profile.goal||"Build skills for the target role.")}</p>
+    ${state.profile.aiSummary?.summary?`<div class="notice"><b>AI Profile Summary:</b> ${esc(state.profile.aiSummary.summary)}</div>`:""}
+    ${state.resumeText?`<p class="small">📄 Resume/project evidence supplied to the profile agent.</p>`:""}
+  `;
+  const skills=state.profile.aiSummary?.extracted_skills?.length?state.profile.aiSummary.extracted_skills:(state.profile.skills?state.profile.skills.split(",").map(x=>x.trim()).filter(Boolean):[]);
+  $("skillList").innerHTML=skills.length?skills.map(s=>`<span class="pill">${esc(s)}</span>`).join(""):"<p class='small'>No skills supplied.</p>";
+
+  $("gapList").innerHTML=(state.analysis.gaps||[]).map(g=>`
+    <div class="gap">
+      <b>${esc(g.skill)}</b> — ${esc(g.current_level)} → ${esc(g.required_level)}
+      <span class="status">${esc(g.priority||"Medium")}</span>
+      <div class="small" style="margin-top:5px">${esc(g.reason)}</div>
+    </div>`).join("");
+
+  $("objectiveList").innerHTML=(state.analysis.objectives||[]).map(x=>`<div class="objective">🎯 ${esc(x)}</div>`).join("");
+
+  $("resourceList").innerHTML=(state.resources.resources||[]).map(r=>{
+    const q=encodeURIComponent(r.query||r.title);
+    return `<div class="resource"><b>🌐 ${esc(r.title)}</b> <span class="small">(${esc(r.type)})</span><p class="small">${esc(r.why)}</p><a target="_blank" rel="noopener" href="https://www.google.com/search?q=${q}">🔎 Find resource</a></div>`;
+  }).join("");
+
+  const weeks=state.plan.weeks||[];
+  $("weeklyPlan").innerHTML=weeks.map((w,i)=>{
+    const saved=state.progress["w"+i]||{};
+    return `<div class="week">
+      <div class="week-head"><b>${esc(w.week)} — ${esc(w.focus)}</b><span class="small">${(w.tasks||[]).filter((_,j)=>saved[j]).length}/${(w.tasks||[]).length}</span></div>
+      ${(w.tasks||[]).map((t,j)=>`<label class="check"><input type="checkbox" data-week="${i}" data-task="${j}" ${saved[j]?"checked":""} onchange="saveProgress()"> <span>${esc(t)}</span></label>`).join("")}
+    </div>`;
+  }).join("");
+
+  $("practiceList").innerHTML=(state.practice.practice||[]).map((x,i)=>`<div class="task"><b>🧪 Task ${i+1}</b><p>${esc(x)}</p></div>`).join("");
+  $("projectList").innerHTML=(state.practice.projects||[]).map(p=>`<div class="project"><h3>🚀 ${esc(p.title)}</h3><p>${esc(p.description)}</p><p>${(p.skills||[]).map(s=>`<span class="pill">${esc(s)}</span>`).join("")}</p></div>`).join("");
+
+  saveProgress();
+}
+
+function saveProgress(){
+  const boxes=document.querySelectorAll("#weeklyPlan input[type=checkbox]");
+  state.progress={};
+  boxes.forEach(b=>{
+    const w=b.dataset.week,t=b.dataset.task;
+    if(!state.progress["w"+w])state.progress["w"+w]={};
+    state.progress["w"+w][t]=b.checked;
+  });
+  localStorage.setItem("edupathProgress",JSON.stringify(state.progress));
+  updateProgress();
+}
+
+async function updateProgress(){
+  const boxes=document.querySelectorAll("#weeklyPlan input[type=checkbox]");
+  const total=boxes.length;
+  const done=[...boxes].filter(b=>b.checked).length;
+  const pct=total?Math.round(done/total*100):0;
+  $("progressPct").textContent=pct+"%";
+  $("progressBar").style.width=pct+"%";
+  $("completedCount").textContent=done;
+  $("remainingCount").textContent=Math.max(total-done,0);
+  $("inProgressCount").textContent=done>0&&done<total?1:0;
+
+  const remaining=[...boxes].filter(b=>!b.checked).map(b=>b.parentElement.innerText).slice(0,3);
+  const firstRemaining=remaining[0]||"Start a portfolio project and interview preparation.";
+  $("report").innerHTML=`
+    <p><b>Skills Acquired:</b> ${done?esc((state.analysis.objectives||[]).slice(0,Math.max(1,Math.ceil(done/Math.max(1,total)*(state.analysis.objectives||[]).length))).join(", ")): "Complete activities to acquire skills."}</p>
+    <p><b>Skills In Progress:</b> ${done&&done<total?"Your current weekly focus is in progress.":"No active week yet."}</p>
+    <p><b>Remaining Gaps:</b> ${esc((state.analysis.gaps||[]).slice(Math.min(done, (state.analysis.gaps||[]).length)).map(g=>g.skill).join(", ")||"Major planned gaps are covered.")}</p>
+    <p><b>Recommended Next Step:</b> ${esc(firstRemaining)}</p>
+  `;
+
+  if(done>=3 && pct<100){
+    $("struggleBox").classList.remove("hidden");
+    $("struggleBox").innerHTML="🔄 <b>Adaptive Coach:</b> You have completed several activities. Revisit any unfinished task before moving to advanced topics. If you repeatedly struggle, use <b>Ask EduPath AI</b> and tell it what went wrong.";
+  }else $("struggleBox").classList.add("hidden");
+}
+
+async function askAI(){
+  const q=$("question").value.trim();
+  if(!q)return;
+  const chat=$("chatBox");
+  chat.innerHTML+=`<div class="msg user">${esc(q)}</div>`;
+  $("question").value="";
+  const thinking=document.createElement("div");
+  thinking.className="msg bot";
+  thinking.innerHTML='<span class="loading"></span> EduPath AI is thinking…';
+  chat.appendChild(thinking);
+  chat.scrollTop=chat.scrollHeight;
+
+  try{
+    const done=[...document.querySelectorAll("#weeklyPlan input")].filter(x=>x.checked).length;
+    const total=document.querySelectorAll("#weeklyPlan input").length;
+    const context={profile:state.profile,analysis:state.analysis,plan:state.plan,progress:{completed:done,total,percent:total?Math.round(done/total*100):0}};
+    let answer;
+    if($("apiKey").value.trim()){
+      const r=await gemini(
+        `Learner context:
+${JSON.stringify(context)}
+Learner question: ${q}
+Return JSON {answer:string,next_actions:[string],adaptation:string}. Answer specifically for this learner. If the learner reports difficulty, identify a smaller prerequisite step and a retry action.`,
+        null,
+        "You are EduPath's Adaptive Coach agent. You use the learner's actual profile, skill gaps and progress. Give concise, actionable guidance. Do not pretend to have verified facts you cannot verify."
+      );
+      answer=`${r.answer}\n\nNext actions:\n${(r.next_actions||[]).map(x=>"• "+x).join("\n")}${r.adaptation?"\n\nAdaptive change:\n"+r.adaptation:""}`;
+    }else{
+      answer=`Based on your ${state.profile.career} path, focus on the highest-priority skill gaps first. Your next incomplete activity is the best immediate step.`;
+    }
+    thinking.textContent=answer;
+  }catch(e){
+    thinking.textContent="I couldn't reach the live AI agent. Check your API key and try again.";
+  }
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function editProfile(){
+  $("dashboard").classList.add("hidden");
+  $("setupCard").classList.remove("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
 </script>
-
 </body>
-
 </html>
