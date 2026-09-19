@@ -4,8 +4,6 @@
     <title>EduPath AI</title>
     <link rel="stylesheet" href="style.css">
 </head>
-    
-
 
 <body>
 
@@ -15,11 +13,44 @@
 
     <p>What do you want to become?</p>
 
-    <input type="text" placeholder="Example: Quant Analyst">
+    <input 
+        type="text" 
+        id="careerInput" 
+        placeholder="Example: Quant Analyst"
+    >
 
     <br><br>
 
-    <button>Next</button>
+    <button onclick="goNext()">Next</button>
+
+    <div id="nextStep"></div>
+
+
+    <script>
+        function goNext() {
+
+            // Get the value entered by the user
+            let career = document.getElementById("careerInput").value;
+
+            // Check if input is empty
+            if (career.trim() === "") {
+                alert("Please enter what you want to become.");
+                return;
+            }
+
+            // Show next step
+            document.getElementById("nextStep").innerHTML = `
+                <h2>Great! 🎯</h2>
+                <p>Your goal is: <strong>${career}</strong></p>
+                <p>Let's create your learning path.</p>
+                <button onclick="startLearning()">Start Learning</button>
+            `;
+        }
+
+        function startLearning() {
+            alert("Your personalized learning path is being created! 🚀");
+        }
+    </script>
 
 </body>
 </html>
