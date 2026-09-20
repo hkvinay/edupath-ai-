@@ -527,35 +527,431 @@ async function updateProgress(){
 }
 
 async function askAI(){
-  const q=$("question").value.trim();
-  if(!q)return;
-  const chat=$("chatBox");
-  chat.innerHTML+=`<div class="msg user">${esc(q)}</div>`;
-  $("question").value="";
-  const thinking=document.createElement("div");
-  thinking.className="msg bot";
-  thinking.innerHTML='<span class="loading"></span> EduPath AI is thinking…';
-  chat.appendChild(thinking);
-  chat.scrollTop=chat.scrollHeight;
+  const q = $("question").value.trim();
+  if(!q) return;
 
-  try{
-    const done=[...document.querySelectorAll("#weeklyPlan input")].filter(x=>x.checked).length;
-    const total=document.querySelectorAll("#weeklyPlan input").length;
-    const context={profile:state.profile,analysis:state.analysis,plan:state.plan,progress:{completed:done,total,percent:total?Math.round(done/total*100):0}};
-    let answer;
+  const chat = $("chatBox");
+
+  // Show user's question
+  chat.innerHTML += `<div class="msg user">${esc(q)}</div>`;
+  $("question").value = "";
+
+  // Thinking message
+  const thinking = document.createElement("div");
+  thinking.className = "msg bot";
+  thinking.innerHTML = '<span class="loading"></span> EduPath AI is thinking…';
+  chat.appendChild(thinking);
+  chat.scrollTop = chat.scrollHeight;
+
+  try {
+
+    // -----------------------------
+    // 1. GET CURRENT LEARNER DATA
+    // -----------------------------
+    const boxes = [...document.querySelectorAll("#weeklyPlan input[type=checkbox]")];
+
+    const completed = boxes.filter(x => x.checked).length;
+    const total = boxes.length;
+
+    const progressPercent = total
+      ? Math.round((completed / total) * 100)
+      : 0;
+
+    const career = state.profile?.career || "your target career";
+    const experience = state.profile?.experience || "Beginner";
+    const goal = state.profile?.goal || "Become job-ready";
+
+    const skills =
+      state.profile?.aiSummary?.extracted_skills ||
+      (state.profile?.skills
+        ? state.profile.skills
+            .split(",")
+            .map(x => x.trim())
+            .filter(Boolean)
+        : []);
+
+    const gaps = state.analysis?.gaps || [];
+
+    const gapText = gaps.length
+      ? gaps.map(g =>
+          `${g.skill}: ${g.current_level} → ${g.required_level} (${g.priority})`
+        ).join("\n")
+      : "No specific skill gaps available.";
+
+    const remainingTasks = boxes
+      .filter(x => !x.checked)
+      .map(x => x.parentElement.innerText)
+      .slice(0, 5);
+
+    // -----------------------------
+    // 2. IF GEMINI API EXISTS
+    // -----------------------------
     if($("apiKey").value.trim()){
-      const r=await gemini(
-        `Learner context:
-${JSON.stringify(context)}
-Learner question: ${q}
-Return JSON {answer:string,next_actions:[string],adaptation:string}. Answer specifically for this learner. If the learner reports difficulty, identify a smaller prerequisite step and a retry action.`,
+
+      const context = {
+        learner: {
+          career: career,
+          experience: experience,
+          goal: goal,
+          skills: skills
+        },
+
+        skill_gaps: gapText,
+
+        progress: {
+          completed: completed,
+          total: total,
+          percentage: progressPercent
+        },
+
+        remaining_tasks: remainingTasks,
+
+        question: q
+      };
+
+      const result = await gemini(
+`
+You are EduPath AI, an adaptive career learning coach.
+
+IMPORTANT:
+Answer the learner's ACTUAL question.
+Do not give the same generic roadmap answer every time.
+
+LEARNER PROFILE:
+${JSON.stringify(context, null, 2)}
+
+QUESTION:
+${q}
+
+Your response must:
+
+1. Directly answer the question.
+2. Use the learner's target career.
+3. Use their existing skills when relevant.
+4. Use their skill gaps when relevant.
+5. Consider their current progress.
+6. Give concrete actions instead of vague advice.
+7. If they ask "what should I learn next", identify a specific skill/topic.
+8. If they ask "why", explain the practical reason.
+9. If they ask about a skill gap, explain how to improve it.
+10. If they ask for a project, give a realistic project idea.
+11. If they ask about interviews, give role-specific preparation.
+12. If they say they are struggling, break the topic into a smaller prerequisite step.
+13. Avoid repeating phrases like "focus on your highest priority skill gaps".
+14. Do not simply repeat their profile.
+15. Keep the answer useful and practical.
+
+Return ONLY this JSON:
+
+{
+  "answer": "direct answer to the learner",
+  "next_actions": [
+    "specific action 1",
+    "specific action 2",
+    "specific action 3"
+  ],
+  "practice": "one practical exercise",
+  "next_step": "the single best immediate next step"
+}
+`,
         null,
-        "You are EduPath's Adaptive Coach agent. You use the learner's actual profile, skill gaps and progress. Give concise, actionable guidance. Do not pretend to have verified facts you cannot verify."
+        `
+You are EduPath AI's Adaptive Learning Coach.
+
+You personalize every answer using the learner's career,
+skills, skill gaps, learning progress and exact question.
+
+Never give generic repeated advice.
+Always answer the exact question first.
+`
       );
-      answer=`${r.answer}\n\nNext actions:\n${(r.next_actions||[]).map(x=>"• "+x).join("\n")}${r.adaptation?"\n\nAdaptive change:\n"+r.adaptation:""}`;
-    }else{
-      answer=`Based on your ${state.profile.career} path, focus on the highest-priority skill gaps first. Your next incomplete activity is the best immediate step.`;
+
+      let output = "";
+
+      output += result.answer || "";
+
+      if(result.next_actions?.length){
+        output += "\n\nNEXT ACTIONS:\n";
+        output += result.next_actions
+          .map((x,i) => `${i + 1}. ${x}`)
+          .join("\n");
+      }
+
+      if(result.practice){
+        output += `\n\nPRACTICE:\n${result.practice}`;
+      }
+
+      if(result.next_step){
+        output += `\n\nYOUR NEXT STEP:\n${result.next_step}`;
+      }
+
+      thinking.textContent = output;
+
+    } else {
+
+      // --------------------------------
+      // 3. SMART OFFLINE FALLBACK
+      // --------------------------------
+
+      const lower = q.toLowerCase();
+
+      let answer = "";
+      let actions = [];
+      let practice = "";
+
+      // NEXT SKILL
+      if(
+        lower.includes("what should i learn") ||
+        lower.includes("learn next") ||
+        lower.includes("next skill") ||
+        lower.includes("what next")
+      ){
+
+        const firstGap = gaps[0];
+
+        if(firstGap){
+
+          answer =
+`For your ${career} goal, I would work next on **${firstGap.skill}**.
+
+Your current level is ${firstGap.current_level}, while the roadmap expects ${firstGap.required_level}. This makes it a useful next learning target.`;
+
+          actions = [
+            `Study the fundamentals of ${firstGap.skill}`,
+            `Complete 3–5 practical exercises`,
+            `Build a small ${career}-related example`,
+            `Recheck this skill before moving to the next gap`
+          ];
+
+          practice =
+`Create a small exercise that uses ${firstGap.skill} to solve a realistic ${career} problem.`;
+
+        }else{
+
+          answer =
+`For your ${career} goal, start with the core technical skill that appears most often in your target role and build a small project around it.`;
+
+          actions = [
+            "Choose one core technical skill",
+            "Learn the fundamentals",
+            "Solve practical exercises",
+            "Apply it in a portfolio project"
+          ];
+
+          practice =
+`Build a small ${career}-related project using one technical skill you already know.`;
+        }
+      }
+
+      // WHY
+      else if(
+        lower.includes("why") ||
+        lower.includes("important") ||
+        lower.includes("importance")
+      ){
+
+        answer =
+`That skill is important for a ${career} because it helps you move from knowing concepts to actually solving problems required in the role.
+
+The best way to understand its importance is to connect the concept to a real task rather than only memorizing theory.`;
+
+        actions = [
+          "Learn the basic concept",
+          "Understand one real-world use case",
+          "Solve a small example",
+          "Apply it in a project"
+        ];
+
+        practice =
+`Take one real ${career} problem and explain how this skill could help solve it.`;
+      }
+
+      // SKILL GAP
+      else if(
+        lower.includes("gap") ||
+        lower.includes("weak") ||
+        lower.includes("missing") ||
+        lower.includes("improve")
+      ){
+
+        if(gaps.length){
+
+          answer =
+`Your current roadmap shows these skill gaps:
+
+${gapText}
+
+Start with the highest-priority gap, learn its fundamentals, and validate it through practice.`;
+
+        }else{
+
+          answer =
+`Your current profile does not contain detailed skill-gap information yet. Compare your current skills with the core requirements of ${career} and identify the first missing skill.`;
+        }
+
+        actions = [
+          "Choose your weakest skill",
+          "Review its fundamentals",
+          "Practice without following a tutorial",
+          "Use the skill in a small project"
+        ];
+
+        practice =
+`Pick your weakest skill and complete one practical task without copying a tutorial.`;
+      }
+
+      // PROJECT
+      else if(
+        lower.includes("project") ||
+        lower.includes("portfolio")
+      ){
+
+        answer =
+`For a ${career} portfolio, build a project that demonstrates actual problem-solving instead of only following a tutorial.
+
+Your project should use at least one skill you already know and one skill you are currently developing.`;
+
+        actions = [
+          "Choose a realistic problem",
+          "Define the data or inputs",
+          "Build the solution",
+          "Test and evaluate it",
+          "Document the project on GitHub"
+        ];
+
+        practice =
+`Build an end-to-end ${career} project that demonstrates your technical skills and produces a measurable result.`;
+      }
+
+      // INTERVIEW
+      else if(
+        lower.includes("interview") ||
+        lower.includes("job") ||
+        lower.includes("resume")
+      ){
+
+        answer =
+`For ${career} interviews, prepare in four areas: technical concepts, problem solving, project explanation and communication.
+
+Your projects should be strong enough that you can clearly explain what you built, why you built it and what you learned.`;
+
+        actions = [
+          "Review core technical concepts",
+          "Practice role-specific questions",
+          "Prepare a 2-minute explanation of each project",
+          "Practice explaining your decisions"
+        ];
+
+        practice =
+`Explain one portfolio project in this format: Problem → Approach → Tools → Result → What you would improve.`;
+      }
+
+      // HOW / EXPLAIN
+      else if(
+        lower.includes("how") ||
+        lower.includes("explain") ||
+        lower.includes("teach")
+      ){
+
+        answer =
+`Let's learn this through three stages:
+
+1. Understand the concept.
+2. See a simple example.
+3. Apply it to a ${career}-related problem.
+
+This is more effective than only reading theory because you immediately test whether you can use the concept.`;
+
+        actions = [
+          "Understand the definition",
+          "Study one simple example",
+          "Solve a similar problem yourself",
+          "Apply the concept to your career path"
+        ];
+
+        practice =
+`Try explaining the topic in your own words and then build one small example without copying code.`;
+      }
+
+      // PROGRESS
+      else if(
+        lower.includes("progress") ||
+        lower.includes("completed") ||
+        lower.includes("finish")
+      ){
+
+        answer =
+`You have completed ${completed} of ${total} planned activities (${progressPercent}%).
+
+Your next focus should be one unfinished activity rather than jumping between several topics.`;
+
+        actions = remainingTasks.length
+          ? remainingTasks.slice(0,3)
+          : [
+              "Review your completed topics",
+              "Build a portfolio project",
+              "Start interview preparation"
+            ];
+
+        practice =
+`Take your next unfinished activity and complete it without switching to another topic.`;
+      }
+
+      // DEFAULT
+      else {
+
+        answer =
+`I can help you with your ${career} learning path.
+
+Your current progress is ${progressPercent}%, and I can give you a specific answer about your skills, gaps, projects, interviews or next learning step.`;
+
+        actions = [
+          `Ask: "What should I learn next for ${career}?"`,
+          "Ask: \"What are my biggest skill gaps?\"",
+          "Ask: \"Give me a project for my career\"",
+          "Ask: \"How should I prepare for interviews?\""
+        ];
+
+        practice =
+`Ask me about one specific skill or problem you are currently struggling with.`;
+      }
+
+      // FORMAT OFFLINE RESPONSE
+      let output = answer;
+
+      if(actions.length){
+        output += "\n\nNEXT ACTIONS:\n";
+        output += actions
+          .map((x,i) => `${i + 1}. ${x}`)
+          .join("\n");
+      }
+
+      if(practice){
+        output += `\n\nPRACTICE:\n${practice}`;
+      }
+
+      thinking.textContent = output;
     }
+
+  } catch(e) {
+
+    console.error("EduPath AI Error:", e);
+
+    thinking.textContent =
+`I couldn't connect to the live AI agent.
+
+Your profile is still available, but Gemini could not process this question.
+
+Please check:
+1. Your Gemini API key
+2. Your internet connection
+3. The Gemini model/API configuration
+
+You can also continue using EduPath's built-in coaching responses.`;
+  }
+
+  chat.scrollTop = chat.scrollHeight;
+}
     thinking.textContent=answer;
   }catch(e){
     thinking.textContent="I couldn't reach the live AI agent. Check your API key and try again.";
